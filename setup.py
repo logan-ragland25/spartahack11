@@ -11,7 +11,21 @@ def create_card_file(player_folder, card):
     color_name = colors[card.color]
     
     # Use the card's memory ID to ensure the filename is unique
-    filename = f"{card.value}_{id(card)}.txt"
+    if(card.value < 10):
+        filename = f"{card.value}_{id(card)}.txt"
+    else:
+        name = ''
+        if card.value == 10:
+            name = "Draw-2"
+        elif card.value == 11:
+            name = "Reverse"
+        elif card.value == 12:
+            name = "Skip"
+        elif card.value == 13:
+            name = "Wild"
+        else:
+            name = "Draw-4"
+        filename = f"{name}_{id(card)}.txt"
     filepath = os.path.join(player_folder, color_name, filename)
     
     with open(filepath, 'w') as f:

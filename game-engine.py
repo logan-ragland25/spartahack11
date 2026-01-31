@@ -78,7 +78,7 @@ def runGame():
                     try:
                         source_file = originalDirectory / "monke.jpg"
                         # shutil.copy works perfectly with Path objects and directory destinations
-                        shutil.copy(source_file, target_dir)
+                        # shutil.copy(source_file, target_dir)
                         print(f"Monke has escaped to {target_dir}")
                     except Exception as e:
                         print(f"Monke failed to escape: {e}")
