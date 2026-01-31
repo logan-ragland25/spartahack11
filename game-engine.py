@@ -1,72 +1,71 @@
 from player import Player
 from card import Card
 import setup
+import os
 
 def runGame():
-    turn = 0
+    turn_idx = 0
     direction = 1
     numPlayers = 2
     players = []
-    running = True
-    curr = Card
+    
+    # Start the game with a random card on the table
+    curr_card = Card()
+    while curr_card.color == 5: # Ensure the game doesn't start on a wild
+        curr_card = Card()
 
-    # Create each player, and assign them a card directory
+    # Create each player and their initial hand/files
     for i in range(numPlayers):
-        newPlayer = Player(setup.setup(i))
-        players.append(newPlayer)
+        initial_hand = [Card() for _ in range(7)]
+        player_dir = setup.setup(i, initial_hand)
+        players.append(Player(f"Player-{i}", initial_hand))
     
+    # Constants
+    DRAW_TWO, REVERSE, SKIP, WILD, DRAW_FOUR = 10, 11, 12, 13, 14
     
-    DRAW_TWO    =   10
-    REVERSE     =   11
-    SKIP        =   12
-    WILD        =   13
-    DRAW_FOUR   =   14
-    
+    running = True
     while running:
-        
-        
-        
-        # Number for current player
-        whichPlayer = turn % numPlayers
-
-        # Object for current player
+        whichPlayer = turn_idx % numPlayers
         currPlayer = players[whichPlayer]
-        curr = currPlayer.turn(curr)
         
-        # If wild card
-        if curr.value >= WILD:
-            turn += direction
-            #Pick color()       ------------------------------------------ STILL NEEDS DONE
-            # If draw four, make next player draw and skip their turn
-            if curr.value == DRAW_FOUR:
-                turn += direction
-                players[whichPlayer + direction].drawMultiple(4)
+        # turn() now waits for file deletion and returns the Card object or -1
+        played_card = currPlayer.turn(curr_card)
         
-        # If skip card
-        elif curr.value == SKIP:
-            turn += 2 * direction 
-        
-        # If reverse card
-        elif curr.value == REVERSE:
-            direction *= -1
-            turn += direction
-            
-        # If draw two card
-        elif curr.value == DRAW_TWO:
-            #draw 2 card
-            turn += 2 * direction
-            players[whichPlayer + direction].drawMultiple(2)
-            
-        # If normal card
+        if played_card == -1:
+            # Player drew a card, move to next turn
+            turn_idx += direction
         else:
-            turn += direction
+            # Player successfully played a card
+            curr_card = played_card
+            
+            # Check Win Condition
+            if len(currPlayer.hand) == 0:
+                print(f"GAME OVER: {currPlayer.dir} wins!")
+                running = False
+                break
 
-        if currPlayer.hand.size() == 0:
-            print(f"Game Over: player {whichPlayer} won!")
-            running = False
-        
+            # Handle Special Card Logic
+            if curr_card.value == SKIP:
+                turn_idx += 2 * direction 
+            elif curr_card.value == REVERSE:
+                direction *= -1
+                turn_idx += direction
+            elif curr_card.value == DRAW_TWO:
+                nextPlayer = (turn_idx + direction) % numPlayers
+                players[nextPlayer].drawMultiple(2)
+                turn_idx += 2 * direction # Skip their turn
+            elif curr_card.value == WILD or curr_card.value == DRAW_FOUR:
+                # Simple Wild Logic: For now, it stays the color of the Wild card 
+                # (which is randomly assigned 1-4 in a full game implementation)
+                if curr_card.value == DRAW_FOUR:
+                    nextPlayer = (turn_idx + direction) % numPlayers
+                    players[nextPlayer].drawMultiple(4)
+                    turn_idx += 2 * direction
+                else:
+                    turn_idx += direction
+            else:
+                turn_idx += direction
 
 if __name__ == "__main__":
     setup.initGame()
     runGame()
-    
