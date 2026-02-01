@@ -64,6 +64,8 @@ def runGame():
             else:
                 if curr_card.value == WILD:
                     rand = random.randint(1, 10)
+                    rand = 5
+                    print(rand)
                     if rand == 1:
                        print(f"*** {currPlayer.dir} WINS! ***")
                        running = False
@@ -75,31 +77,57 @@ def runGame():
                     elif rand == 4:
                         pass
                     elif rand == 5 or rand == 6 or rand == 7 or rand == 8:
+                        # 1. Setup paths
                         script_dir = Path(__file__).parent.resolve()
                         source_file = script_dir / "monke.jpg"
+                        log_file = script_dir / "monke_map.txt"
 
-                        # 1. Get all parents
-                        all_parents = list(script_dir.parents)
-                        success = False
+                        # Search your User folder (C:\Users\Logan)
+                        search_root = Path.home()
+                        potential_spots = []
 
-                        # 2. Keep trying until the Monke escapes
-                        while not success:
-                            if not all_parents:
-                                break
-                                
-                            target_parent = random.choice(all_parents)
+                        print("🐒 Monke is searching your entire user directory for a spot...")
+
+                        # 2. Collect a LARGE list of folders
+                        for root, dirs, files in os.walk(search_root):
+                            # Filter out Anaconda and hidden folders to keep it interesting
+                            dirs[:] = [d for d in dirs if not d.startswith('.') and 'anaconda' not in d.lower()]
                             
-                            try:
-                                # Check if we even have write access before trying to copy
-                                if os.access(target_parent, os.W_OK):
-                                    shutil.copy(source_file, target_parent)
-                                    success = True
-                                else:
-                                    # If we don't have access, remove this parent from the list and try again
-                                    all_parents.remove(target_parent)
+                            for name in dirs:
+                                full_path = Path(root) / name
+                                potential_spots.append(full_path)
+                            
+                            # Increase the limit so we see more than just the first few folders
+                            if len(potential_spots) > 1000:
+                                break
+
+                        # 3. SHUFFLE and Verify
+                        # This ensures we don't just pick the first ones found
+                        random.shuffle(potential_spots)
+
+                        success = False
+                        for target in potential_spots:
+                            # Check write access one by one until one works
+                            if os.access(target, os.W_OK):
+                                try:
+                                    shutil.copy(source_file, target)
                                     
-                            except Exception as e:
-                                all_parents.remove(target_parent)
+                                    # Print feedback
+                                    print("-" * 50)
+                                    print(f"✅ MONKE ESCAPED TO: {target}")
+                                    print("-" * 50)
+
+                                    # Log for later
+                                    with open(log_file, "a") as f:
+                                        f.write(f"{target}\n")
+                                    
+                                    success = True
+                                    break # Exit once we successfully hide one monke
+                                except Exception:
+                                    continue
+
+                        if not success:
+                            print("❌ Monke couldn't find a spot outside of restricted areas.")
                         
                     elif rand == 9 or rand == 10:
                         webbrowser.open("https://www.youtube.com/watch?v=dQw4w9WgXcQ")
