@@ -12,7 +12,6 @@ class Player:
         new_card = Card()
         self.hand.append(new_card)
         setup.create_card_file(self.dir, new_card)
-        print(f"DEBUG: {self.dir} drew {new_card}")
         return -1 
 
     def drawMultiple(self, count):
@@ -26,7 +25,7 @@ class Player:
         colors = {1: "Red", 2: "Yellow", 3: "Green", 4: "Blue"}
         options = []
         for c_id, name in colors.items():
-            file_path = os.path.join(picker_path, f"DELETE_FOR_{name.upper()}.txt")
+            file_path = os.path.join(picker_path, f"DELETE_FOR_{name.upper()}")
             options.append((file_path, c_id, name))
             with open(file_path, 'w') as f: f.write(f"Delete for {name}")
 
@@ -51,7 +50,7 @@ class Player:
         print(f"\n--- {self.dir}'s TURN ---")
         print(f"TOP CARD: {curr_card}")
         
-        draw_file_path = os.path.join(self.dir, "DELETE_TO_DRAW.txt")
+        draw_file_path = os.path.join(self.dir, "DELETE_TO_DRAW")
         with open(draw_file_path, 'w') as f: 
             f.write("Delete to draw.")
 

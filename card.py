@@ -20,4 +20,6 @@ class Card:
 
     def __repr__(self):
         colors = {1: "Red", 2: "Yellow", 3: "Green", 4: "Blue", 5: "Wild"}
-        return f"{colors[self.color]} {self.value}"
+        names = {10: "Draw-2", 11: "Reverse", 12: "Skip", 13: "Wild", 14: "Draw-4"}
+        name_str = names.get(self.value, str(self.value))
+        return f"{colors[self.color]} {name_str}"
