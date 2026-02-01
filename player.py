@@ -9,12 +9,11 @@ class Player:
         self.dir = name
 
     def draw(self):
-        """Actually creates the new card object and the physical file."""
         new_card = Card()
         self.hand.append(new_card)
         setup.create_card_file(self.dir, new_card)
-        print(f"DEBUG: {self.dir} successfully drew {new_card}")
-        return -1 # Signals to the engine that the turn is over via a draw
+        print(f"DEBUG: {self.dir} drew {new_card}")
+        return -1 
 
     def drawMultiple(self, count):
         for _ in range(count):
@@ -22,18 +21,16 @@ class Player:
 
     def pickColor(self):
         picker_path = os.path.join(self.dir, "CHOOSE_COLOR")
-        if not os.path.exists(picker_path):
-            os.mkdir(picker_path)
+        if not os.path.exists(picker_path): os.mkdir(picker_path)
         
         colors = {1: "Red", 2: "Yellow", 3: "Green", 4: "Blue"}
         options = []
         for c_id, name in colors.items():
             file_path = os.path.join(picker_path, f"DELETE_FOR_{name.upper()}.txt")
             options.append((file_path, c_id, name))
-            with open(file_path, 'w') as f:
-                f.write(f"Delete this file to choose {name}")
+            with open(file_path, 'w') as f: f.write(f"Delete for {name}")
 
-        print(f"WILD PLAYED! Go to {picker_path} and delete a color file.")
+        print(f"WILD! Delete a file in {picker_path}")
         
         chosen_color = None
         while chosen_color is None:
@@ -45,54 +42,48 @@ class Player:
 
         # Cleanup
         for path, _, _ in options:
-            if os.path.exists(path):
-                os.remove(path)
-        try:
-            os.rmdir(picker_path)
-        except:
-            pass
+            if os.path.exists(path): os.remove(path)
+        try: os.rmdir(picker_path)
+        except: pass
         return chosen_color
 
     def turn(self, curr_card):
-        print(f"\n{'='*20}")
-        print(f"TURN: {self.dir}")
+        print(f"\n--- {self.dir}'s TURN ---")
         print(f"TOP CARD: {curr_card}")
-        print(f"{'='*20}")
         
         draw_file_path = os.path.join(self.dir, "DELETE_TO_DRAW.txt")
-        # Ensure the draw file exists at the start of the turn
         with open(draw_file_path, 'w') as f: 
-            f.write("Delete this file to draw a card and end your turn.")
+            f.write("Delete to draw.")
 
         while True:
-            # CHECK FOR DRAW
+            # 1. Check Draw
             if not os.path.exists(draw_file_path):
-                print(f"{self.dir} chose to draw.")
-                return self.draw() # This was the missing link!
+                return self.draw()
 
-            # CHECK FOR PLAYED CARD
+            # 2. Check Cards
             for card in self.hand:
                 color_names = {1: "Red", 2: "Yellow", 3: "Green", 4: "Blue", 5: "Wild"}
-                filename = f"{card.value}_{id(card)}.txt"
+                # USE THE HELPER HERE:
+                filename = setup.get_card_filename(card)
                 path = os.path.join(self.dir, color_names[card.color], filename)
 
                 if not os.path.exists(path):
-                    if (card.color == curr_card.color or 
-                        card.value == curr_card.value or 
-                        card.color == 5):
-                        
+                    # Validating
+                    is_match = (card.color == curr_card.color or 
+                                card.value == curr_card.value or 
+                                card.color == 5)
+                    
+                    if is_match:
                         self.hand.remove(card)
                         if os.path.exists(draw_file_path): os.remove(draw_file_path)
                         
                         if card.color == 5:
                             card.color = self.pickColor()
-                        
                         return card
                     else:
-                        print(f"INVALID! {card} can't be played on {curr_card}.")
-                        setup.create_card_file(self.dir, card) # Put it back
-                        # Force a draw for trying to cheat!
+                        print(f"ILLEGAL MOVE! {card} cannot play on {curr_card}.")
+                        setup.create_card_file(self.dir, card) # Restore file
                         if os.path.exists(draw_file_path): os.remove(draw_file_path)
-                        return self.draw()
+                        return self.draw() # Penalty draw
             
-            time.sleep(1)
+            time.sleep(0.8)

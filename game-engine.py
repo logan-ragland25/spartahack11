@@ -53,35 +53,9 @@ def runGame():
                     direction *= -1
                     turn_idx += direction
             elif curr_card.value == DRAW_TWO:
-                rand = random.randint(1, 4)
-                if rand == 1:
-                    nextPlayer = (turn_idx + direction) % numPlayers
-                    players[nextPlayer].drawMultiple(2)
-                    turn_idx += 2 * direction
-                elif rand == 2:
-                    exponent = random.randint(1, 4)
-                    nextPlayer = (turn_idx + direction) % numPlayers
-                    players[nextPlayer].drawMultiple(2**exponent)
-                    turn_idx += 2 * direction
-                elif rand == 3:
-                    pass
-                elif rand == 4:
-                    # Get the current folder as a Path object (makes / monke.jpg work)
-                    originalDirectory = Path.cwd()
-                    
-                    # Calculate how many levels to go up
-                    amount = random.randint(1, 5)
-                    target_dir = originalDirectory
-                    for _ in range(amount):
-                        target_dir = target_dir.parent # This is the cleaner way to go ".."
-                    
-                    try:
-                        source_file = originalDirectory / "monke.jpg"
-                        # shutil.copy works perfectly with Path objects and directory destinations
-                        # shutil.copy(source_file, target_dir)
-                        print(f"Monke has escaped to {target_dir}")
-                    except Exception as e:
-                        print(f"Monke failed to escape: {e}")
+                nextPlayer = (turn_idx + direction) % numPlayers
+                players[nextPlayer].drawMultiple(2)
+                turn_idx += 2 * direction
             elif curr_card.value == DRAW_FOUR:
                 nextPlayer = (turn_idx + direction) % numPlayers
                 players[nextPlayer].drawMultiple(4)
