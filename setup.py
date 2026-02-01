@@ -9,7 +9,7 @@ def get_card_filename(card):
     """Generates the exact filename string used for tracking."""
     names = {10: "Draw-2", 11: "Reverse", 12: "Skip", 13: "Wild", 14: "Draw-4"}
     name_str = names.get(card.value, str(card.value))
-    return f"{name_str}_{id(card)}.txt"
+    return f"{name_str}_{id(card)}"
 
 def create_card_file(player_folder, card):
     colors = {1: "Red", 2: "Yellow", 3: "Green", 4: "Blue", 5: "Wild"}
