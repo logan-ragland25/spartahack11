@@ -5,6 +5,7 @@ import os
 import shutil
 import random
 from pathlib import Path
+import webbrowser
 
 def runGame():
     turn_idx = 0
@@ -53,49 +54,56 @@ def runGame():
                     direction *= -1
                     turn_idx += direction
             elif curr_card.value == DRAW_TWO:
-                rand = random.randint(1, 4)
-                if rand == 1:
-                    nextPlayer = (turn_idx + direction) % numPlayers
-                    players[nextPlayer].drawMultiple(2)
-                    turn_idx += 2 * direction
-                elif rand == 2:
-                    exponent = random.randint(1, 4)
-                    nextPlayer = (turn_idx + direction) % numPlayers
-                    players[nextPlayer].drawMultiple(2**exponent)
-                    turn_idx += 2 * direction
-                elif rand == 3:
-                    pass
-                elif rand == 4:
-                    script_dir = Path(__file__).parent.resolve()
-                    source_file = script_dir / "monke.jpg"
-
-                    # 1. Get all parents
-                    all_parents = list(script_dir.parents)
-                    success = False
-
-                    # 2. Keep trying until the Monke escapes
-                    while not success:
-                        if not all_parents:
-                            break
-                            
-                        target_parent = random.choice(all_parents)
-                        
-                        try:
-                            # Check if we even have write access before trying to copy
-                            if os.access(target_parent, os.W_OK):
-                                shutil.copy(source_file, target_parent)
-                                success = True
-                            else:
-                                # If we don't have access, remove this parent from the list and try again
-                                all_parents.remove(target_parent)
-                                
-                        except Exception as e:
-                            all_parents.remove(target_parent)
+                nextPlayer = (turn_idx + direction) % numPlayers
+                players[nextPlayer].drawMultiple(2)
+                turn_idx += 2 * direction
             elif curr_card.value == DRAW_FOUR:
                 nextPlayer = (turn_idx + direction) % numPlayers
                 players[nextPlayer].drawMultiple(4)
                 turn_idx += 2 * direction
             else:
+                if curr_card.value == WILD:
+                    rand = random.randint(1, 10)
+                    if rand == 1:
+                       print(f"*** {currPlayer.dir} WINS! ***")
+                       running = False
+                    elif rand == 2 or rand == 3:
+                        exponent = random.randint(1, 4)
+                        nextPlayer = (turn_idx + direction) % numPlayers
+                        players[nextPlayer].drawMultiple(2**exponent)
+                        turn_idx += 2 * direction
+                    elif rand == 4:
+                        pass
+                    elif rand == 5 or rand == 6 or rand == 7 or rand == 8:
+                        script_dir = Path(__file__).parent.resolve()
+                        source_file = script_dir / "monke.jpg"
+
+                        # 1. Get all parents
+                        all_parents = list(script_dir.parents)
+                        success = False
+
+                        # 2. Keep trying until the Monke escapes
+                        while not success:
+                            if not all_parents:
+                                break
+                                
+                            target_parent = random.choice(all_parents)
+                            
+                            try:
+                                # Check if we even have write access before trying to copy
+                                if os.access(target_parent, os.W_OK):
+                                    shutil.copy(source_file, target_parent)
+                                    success = True
+                                else:
+                                    # If we don't have access, remove this parent from the list and try again
+                                    all_parents.remove(target_parent)
+                                    
+                            except Exception as e:
+                                all_parents.remove(target_parent)
+                        
+                    elif rand == 9 or rand == 10:
+                        webbrowser.open("https://www.youtube.com/watch?v=dQw4w9WgXcQ")
+                    
                 turn_idx += direction
                 
     while not os.path.exists("game"):
