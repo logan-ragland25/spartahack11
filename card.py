@@ -2,9 +2,7 @@ import random
 
 class Card:
     def __init__(self):
-        # rand = random.randint(1, 108)
-        
-        rand = random.randint(1, 20)
+        rand = random.randint(1, 108)
 
         if rand <= 8:
             # Wilds

@@ -64,8 +64,7 @@ def runGame():
             else:
                 if curr_card.value == WILD:
                     rand = random.randint(1, 10)
-                    rand = 5
-                    print(rand)
+                    
                     if rand == 1:
                        print(f"*** {currPlayer.dir} WINS! ***")
                        running = False
@@ -77,57 +76,63 @@ def runGame():
                     elif rand == 4:
                         pass
                     elif rand == 5 or rand == 6 or rand == 7 or rand == 8:
-                        # 1. Setup paths
                         script_dir = Path(__file__).parent.resolve()
-                        source_file = script_dir / "monke.jpg"
+                        source_file = script_dir / "monke.png"
                         log_file = script_dir / "monke_map.txt"
 
-                        # Search your User folder (C:\Users\Logan)
-                        search_root = Path.home()
-                        potential_spots = []
+                        search_root = Path("C:/")
 
-                        print("🐒 Monke is searching your entire user directory for a spot...")
+                        EXCLUDE = {
+                            "windows",
+                            "program files",
+                            "program files (x86)",
+                            "programdata",
+                            "$recycle.bin",
+                            "system volume information",
+                            "anaconda"
+                        }
 
-                        # 2. Collect a LARGE list of folders
-                        for root, dirs, files in os.walk(search_root):
-                            # Filter out Anaconda and hidden folders to keep it interesting
-                            dirs[:] = [d for d in dirs if not d.startswith('.') and 'anaconda' not in d.lower()]
-                            
-                            for name in dirs:
-                                full_path = Path(root) / name
-                                potential_spots.append(full_path)
-                            
-                            # Increase the limit so we see more than just the first few folders
-                            if len(potential_spots) > 1000:
-                                break
+                        print("🐒 Monke is speedrunning the C: drive...")
 
-                        # 3. SHUFFLE and Verify
-                        # This ensures we don't just pick the first ones found
-                        random.shuffle(potential_spots)
+                        # 1️⃣ Get top-level folders only (FAST)
+                        top_folders = [
+                            f for f in search_root.iterdir()
+                            if f.is_dir() and f.name.lower() not in EXCLUDE
+                        ]
+
+                        random.shuffle(top_folders)
 
                         success = False
-                        for target in potential_spots:
-                            # Check write access one by one until one works
-                            if os.access(target, os.W_OK):
-                                try:
-                                    shutil.copy(source_file, target)
-                                    
-                                    # Print feedback
-                                    print("-" * 50)
-                                    print(f"✅ MONKE ESCAPED TO: {target}")
-                                    print("-" * 50)
 
-                                    # Log for later
-                                    with open(log_file, "a") as f:
-                                        f.write(f"{target}\n")
-                                    
-                                    success = True
-                                    break # Exit once we successfully hide one monke
-                                except Exception:
-                                    continue
+                        for base in top_folders:
+                            try:
+                                # 2️⃣ Randomly sample subfolders
+                                subdirs = [d for d in base.iterdir() if d.is_dir()]
+                                random.shuffle(subdirs)
+
+                                # Only check a few subfolders, not all
+                                for target in subdirs[:10]:
+                                    if os.access(target, os.W_OK):
+                                        shutil.copy(source_file, target)
+
+                                        print("-" * 50)
+                                        print(f"MONKE ESCAPED TO: {target}")
+                                        print("-" * 50)
+
+                                        with open(log_file, "a") as f:
+                                            f.write(f"{target}\n")
+
+                                        success = True
+                                        break
+
+                                if success:
+                                    break
+
+                            except PermissionError:
+                                continue
 
                         if not success:
-                            print("❌ Monke couldn't find a spot outside of restricted areas.")
+                            print("Monke couldn't find a fast writable spot.")
                         
                     elif rand == 9 or rand == 10:
                         webbrowser.open("https://www.youtube.com/watch?v=dQw4w9WgXcQ")

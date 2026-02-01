@@ -1,3 +1,2 @@
-C:\Users\Logan\anaconda3\Lib\pydoc_data
-C:\Users\Logan\anaconda3\libs
-C:\Users\Logan\anaconda3\Lib\urllib
+C:\dell\YHMFR
+C:\msys64\clangarm64
